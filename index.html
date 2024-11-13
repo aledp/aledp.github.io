@@ -1,1 +1,89 @@
-hola mundo
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reconocimiento de Voz Acumulado</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 10px;
+    }
+    button {
+      font-size: 18px;
+      padding: 10px;
+      margin: 10px 0;
+      cursor: pointer;
+      width: 100%;
+    }
+    #textoReconocido, #textoAcumulado {
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin-top: 10px;
+      font-size: 16px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      resize: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Prueba de Reconocimiento de Voz Acumulado</h1>
+  <button onclick="iniciarReconocimiento()">Iniciar Reconocimiento de Voz</button>
+  <button onclick="detenerReconocimiento()">Detener Reconocimiento</button>
+  <button onclick="guardarTexto()">Guardar Texto</button>
+  <textarea id="textoReconocido" placeholder="Texto reconocido en tiempo real..."></textarea>
+  <textarea id="textoAcumulado" placeholder="Texto acumulado..."></textarea>
+  <br>
+  <a id="descargar" href="#" download="transcripcion.txt" style="display:none;">Descargar archivo</a>
+
+  <script>
+    // Verifica si el navegador soporta la Web Speech API
+    if ('webkitSpeechRecognition' in window) {
+      const reconocimiento = new webkitSpeechRecognition(); // Para Chrome y otros basados en WebKit
+      reconocimiento.lang = 'es-AR'; // Español de Argentina
+      reconocimiento.continuous = true; // Reconocimiento continuo
+      reconocimiento.interimResults = true; // Resultados provisionales (en tiempo real)
+      
+      let textoAcumulado = '';
+
+      // Evento que maneja el resultado de la transcripción
+      reconocimiento.onresult = function(event) {
+        let texto = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          texto += event.results[i][0].transcript;
+        }
+        document.getElementById('textoReconocido').textContent = texto;
+        textoAcumulado += `\n\n------------------------------------\nFecha y hora: ${new Date().toLocaleString()}\n${texto}`;
+        document.getElementById('textoAcumulado').value = textoAcumulado;
+      };
+
+      // Función para iniciar el reconocimiento
+      function iniciarReconocimiento() {
+        reconocimiento.start();
+      }
+
+      // Función para detener el reconocimiento
+      function detenerReconocimiento() {
+        reconocimiento.stop();
+      }
+
+      // Función para guardar el texto en un archivo
+      function guardarTexto() {
+        const blob = new Blob([textoAcumulado], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const enlace = document.getElementById('descargar');
+        enlace.href = url;
+        enlace.style.display = 'inline'; // Muestra el enlace para descargar
+      }
+    } else {
+      alert('Web Speech API no es compatible con este navegador.');
+    }
+  </script>
+</body>
+</html>
