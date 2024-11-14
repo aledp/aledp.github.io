@@ -123,7 +123,7 @@
 
         startButton.onclick = function() {
             if (realTimeText.textContent) {
-                accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n" + realTimeText.textContent;
+                accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n------------------------------------\n" + realTimeText.textContent;
             }
             realTimeText.textContent = '';  // Clear real-time text
             recognition.start();
@@ -131,7 +131,7 @@
 
         stopButton.onclick = function() {
             recognition.stop();
-            accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n" + realTimeText.textContent;
+            accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n------------------------------------\n" + realTimeText.textContent;
             accumulatedText.textContent = accumulated;
         };
 
