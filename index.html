@@ -90,7 +90,7 @@
         const accumulatedText = document.getElementById('accumulatedText');
 
         let recognition;
-        let accumulated = "";
+        let accumulated = "";  // Variable para acumular el texto final
 
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
@@ -122,14 +122,15 @@
         }
 
         startButton.onclick = function() {
-            accumulated = "";  // Reset accumulated text
+            if (realTimeText.textContent) {
+                accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n" + realTimeText.textContent;
+            }
             realTimeText.textContent = '';  // Clear real-time text
             recognition.start();
         };
 
         stopButton.onclick = function() {
             recognition.stop();
-            // Accumulate the final text once stopped
             accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n" + realTimeText.textContent;
             accumulatedText.textContent = accumulated;
         };
@@ -145,5 +146,4 @@
 
 </body>
 </html>
-
 
