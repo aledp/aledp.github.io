@@ -123,16 +123,18 @@
 
         startButton.onclick = function() {
             if (realTimeText.textContent) {
-                accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n------------------------------------\n" + realTimeText.textContent;
+                // Si ya hay texto acumulado, agregar la fecha y hora y luego el nuevo texto.
+                accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n" + realTimeText.textContent;
             }
-            realTimeText.textContent = '';  // Clear real-time text
+            realTimeText.textContent = '';  // Limpiar el texto en tiempo real
             recognition.start();
         };
 
         stopButton.onclick = function() {
             recognition.stop();
-            accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n------------------------------------\n" + realTimeText.textContent;
-            accumulatedText.textContent = accumulated;
+            // Al detenerse, agregar el último texto reconocido
+            accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n" + realTimeText.textContent;
+            accumulatedText.textContent = accumulated;  // Mostrar el texto acumulado
         };
 
         downloadButton.onclick = function() {
