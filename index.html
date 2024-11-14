@@ -1,89 +1,100 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reconocimiento de Voz Acumulado</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      padding: 10px;
-    }
-    button {
-      font-size: 18px;
-      padding: 10px;
-      margin: 10px 0;
-      cursor: pointer;
-      width: 100%;
-    }
-    #textoReconocido, #textoAcumulado {
-      font-size: 16px;
-      margin-top: 20px;
-    }
-    textarea {
-      width: 100%;
-      height: 150px;
-      margin-top: 10px;
-      font-size: 16px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      resize: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Reconocimiento de Voz</title>
 </head>
 <body>
-  <h1>Prueba de Reconocimiento de Voz Acumulado</h1>
-  <button onclick="iniciarReconocimiento()">Iniciar Reconocimiento de Voz</button>
-  <button onclick="detenerReconocimiento()">Detener Reconocimiento</button>
-  <button onclick="guardarTexto()">Guardar Texto</button>
-  <textarea id="textoReconocido" placeholder="Texto reconocido en tiempo real..."></textarea>
-  <textarea id="textoAcumulado" placeholder="Texto acumulado..."></textarea>
-  <br>
-  <a id="descargar" href="#" download="transcripcion.txt" style="display:none;">Descargar archivo</a>
+    <h1>Reconocimiento de Voz y Acumulación de Texto</h1>
 
-  <script>
-    // Verifica si el navegador soporta la Web Speech API
-    if ('webkitSpeechRecognition' in window) {
-      const reconocimiento = new webkitSpeechRecognition(); // Para Chrome y otros basados en WebKit
-      reconocimiento.lang = 'es-AR'; // Español de Argentina
-      reconocimiento.continuous = true; // Reconocimiento continuo
-      reconocimiento.interimResults = true; // Resultados provisionales (en tiempo real)
-      
-      let textoAcumulado = '';
+    <button id="startButton">Iniciar</button>
+    <button id="stopButton" disabled>Fin</button>
+    <button id="saveButton" disabled>Guardar</button>
+    <button id="downloadButton" disabled>Descargar</button>
 
-      // Evento que maneja el resultado de la transcripción
-      reconocimiento.onresult = function(event) {
-        let texto = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          texto += event.results[i][0].transcript;
+    <h2>Texto Reconocido en Tiempo Real:</h2>
+    <p id="realTimeText">Esperando...</p>
+
+    <h2>Texto Acumulado:</h2>
+    <pre id="accumulatedText">Esperando...</pre>
+
+    <script>
+        const startButton = document.getElementById("startButton");
+        const stopButton = document.getElementById("stopButton");
+        const saveButton = document.getElementById("saveButton");
+        const downloadButton = document.getElementById("downloadButton");
+        const realTimeText = document.getElementById("realTimeText");
+        const accumulatedText = document.getElementById("accumulatedText");
+
+        let recognition;
+        let accumulatedTranscript = ""; // Texto acumulado
+
+        // Configuración del reconocimiento de voz
+        function initSpeechRecognition() {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "es-AR"; // Español (Argentina)
+            recognition.interimResults = true;
+
+            recognition.onresult = (event) => {
+                let currentTranscript = "";
+
+                for (const result of event.results) {
+                    currentTranscript += result[0].transcript;
+                }
+
+                realTimeText.innerText = currentTranscript;
+
+                // Acumular texto solo cuando el resultado es final
+                if (event.results[0].isFinal) {
+                    accumulatedTranscript += `\n------------------------------------\nFecha y hora: ${new Date().toLocaleString()}\n${currentTranscript}`;
+                    realTimeText.innerText = "Esperando..."; // Limpiar el texto en tiempo real después de cada resultado final
+                }
+            };
+
+            recognition.onend = () => {
+                stopButton.disabled = true;
+                saveButton.disabled = false;
+                downloadButton.disabled = false;
+                accumulatedText.innerText = accumulatedTranscript; // Mostrar todo el texto acumulado al final
+            };
         }
-        document.getElementById('textoReconocido').textContent = texto;
-        textoAcumulado += `\n\n------------------------------------\nFecha y hora: ${new Date().toLocaleString()}\n${texto}`;
-        document.getElementById('textoAcumulado').value = textoAcumulado;
-      };
 
-      // Función para iniciar el reconocimiento
-      function iniciarReconocimiento() {
-        reconocimiento.start();
-      }
+        // Iniciar reconocimiento de voz
+        startButton.addEventListener("click", () => {
+            initSpeechRecognition();
+            recognition.start();
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            saveButton.disabled = true;
+            downloadButton.disabled = true;
+            realTimeText.innerText = "Escuchando...";
+        });
 
-      // Función para detener el reconocimiento
-      function detenerReconocimiento() {
-        reconocimiento.stop();
-      }
+        // Detener reconocimiento de voz
+        stopButton.addEventListener("click", () => {
+            recognition.stop();
+            startButton.disabled = false;
+        });
 
-      // Función para guardar el texto en un archivo
-      function guardarTexto() {
-        const blob = new Blob([textoAcumulado], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const enlace = document.getElementById('descargar');
-        enlace.href = url;
-        enlace.style.display = 'inline'; // Muestra el enlace para descargar
-      }
-    } else {
-      alert('Web Speech API no es compatible con este navegador.');
-    }
-  </script>
+        // Guardar texto acumulado en un archivo
+        saveButton.addEventListener("click", () => {
+            const fileName = prompt("Ingresa el nombre del archivo:", "transcripcion.txt");
+            if (fileName) {
+                downloadButton.disabled = false;
+            }
+        });
+
+        // Descargar archivo acumulado
+        downloadButton.addEventListener("click", () => {
+            const blob = new Blob([accumulatedTranscript], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = fileName || "transcripcion.txt";
+            link.click();
+            URL.revokeObjectURL(url);
+        });
+    </script>
 </body>
 </html>
+
