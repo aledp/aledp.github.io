@@ -25,7 +25,7 @@
         const accumulatedText = document.getElementById("accumulatedText");
 
         let recognition;
-        let accumulatedTranscript = ""; // Texto acumulado
+        let accumulatedTranscript = ""; // Texto acumulado final
         let isRecording = false; // Estado para el reconocimiento continuo
 
         // Configuración del reconocimiento de voz
@@ -42,11 +42,13 @@
                     currentTranscript += result[0].transcript;
                 }
 
+                // Mostrar texto en tiempo real
                 realTimeText.innerText = currentTranscript;
 
                 // Acumular texto solo cuando el resultado es final
-                if (event.results[0].isFinal) {
+                if (event.results[event.results.length - 1].isFinal) {
                     accumulatedTranscript += `\n------------------------------------\nFecha y hora: ${new Date().toLocaleString()}\n${currentTranscript}`;
+                    accumulatedText.innerText = accumulatedTranscript; // Mostrar el texto acumulado final
                     realTimeText.innerText = "Esperando..."; // Limpiar el texto en tiempo real después de cada resultado final
                 }
             };
@@ -96,3 +98,4 @@
     </script>
 </body>
 </html>
+
