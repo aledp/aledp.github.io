@@ -28,12 +28,14 @@
 
         let recognition;
         let accumulatedTranscript = ""; // Texto acumulado
+        let isRecording = false; // Estado para el reconocimiento continuo
 
         // Configuración del reconocimiento de voz
         function initSpeechRecognition() {
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = "es-AR"; // Español (Argentina)
             recognition.interimResults = true;
+            recognition.continuous = true; // Habilita el reconocimiento continuo
 
             recognition.onresult = (event) => {
                 let currentTranscript = "";
@@ -51,17 +53,18 @@
                 }
             };
 
+            // Si el reconocimiento se detiene, reiniciar automáticamente si está en modo grabación
             recognition.onend = () => {
-                stopButton.disabled = true;
-                saveButton.disabled = false;
-                downloadButton.disabled = false;
-                accumulatedText.innerText = accumulatedTranscript; // Mostrar todo el texto acumulado al final
+                if (isRecording) recognition.start();
             };
         }
 
         // Iniciar reconocimiento de voz
         startButton.addEventListener("click", () => {
-            initSpeechRecognition();
+            if (!recognition || !isRecording) { // Solo inicializar si no está ya grabando
+                initSpeechRecognition();
+            }
+            isRecording = true;
             recognition.start();
             startButton.disabled = true;
             stopButton.disabled = false;
@@ -72,8 +75,13 @@
 
         // Detener reconocimiento de voz
         stopButton.addEventListener("click", () => {
+            isRecording = false;
             recognition.stop();
             startButton.disabled = false;
+            stopButton.disabled = true;
+            saveButton.disabled = false;
+            downloadButton.disabled = false;
+            accumulatedText.innerText = accumulatedTranscript; // Mostrar el texto acumulado final
         });
 
         // Guardar texto acumulado en un archivo
@@ -97,4 +105,5 @@
     </script>
 </body>
 </html>
+
 
