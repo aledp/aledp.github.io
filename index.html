@@ -34,14 +34,6 @@
             height: 200px;
             overflow-y: auto;
         }
-
-        #instructions {
-            margin-top: 30px;
-            font-size: 14px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            background-color: #f9f9f9;
-        }
     </style>
 </head>
 <body>
@@ -78,9 +70,10 @@
         <p>Ingresa el nombre que deseas y confirma para descargar el archivo, que contendrá todas las transcripciones acumuladas hasta el momento.</p>
 
         <h4> Versión: </h4>
-        <p> 15/11/2024 16:15</p>
-    </div>
+        <p> 15/11/2024 16:25</p>
 
+
+    </div>
     <script>
         const startButton = document.getElementById('startButton');
         const stopButton = document.getElementById('stopButton');
@@ -89,12 +82,11 @@
         const accumulatedText = document.getElementById('accumulatedText');
 
         let recognition;
-        let accumulated = "";  // Variable para acumular el texto final
-        let isRecording = false;
+        let accumulated = ""; // Variable para acumular el texto final
 
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
-            recognition.lang = 'es-AR';  // Español de Argentina
+            recognition.lang = 'es-AR'; // Español de Argentina
             recognition.continuous = true;
             recognition.interimResults = true;
 
@@ -102,8 +94,7 @@
                 startButton.disabled = true;
                 stopButton.disabled = false;
                 downloadButton.disabled = true;
-                isRecording = true;
-                realTimeText.textContent = '';  // Limpiar texto temporal
+                realTimeText.textContent = ''; // Limpiar texto temporal
             };
 
             recognition.onresult = function(event) {
@@ -115,31 +106,25 @@
             };
 
             recognition.onend = function() {
+                startButton.disabled = false;
                 stopButton.disabled = true;
                 downloadButton.disabled = false;
-                isRecording = false;
             };
         } else {
             alert("Lo siento, tu navegador no es compatible con el reconocimiento de voz.");
         }
 
         startButton.onclick = function() {
-            // Acumular texto actual (si lo hay) antes de reiniciar
-            if (realTimeText.textContent.trim() && !isRecording) {
-                accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n------------------------------------\n" + realTimeText.textContent;
-                accumulatedText.textContent = accumulated;
-                realTimeText.textContent = ''; // Limpiar texto en tiempo real
-            }
-
             recognition.start();
         };
 
         stopButton.onclick = function() {
             recognition.stop();
             if (realTimeText.textContent.trim()) {
-                accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n------------------------------------\n" + realTimeText.textContent;
+                // Agregar texto al acumulado con fecha y hora
+                accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n------------------------------------\n" + realTimeText.textContent.trim();
                 accumulatedText.textContent = accumulated; // Mostrar texto acumulado
-                realTimeText.textContent = ''; // Limpiar texto temporal
+                realTimeText.textContent = ''; // Limpiar texto en tiempo real
             }
         };
 
@@ -154,3 +139,4 @@
 
 </body>
 </html>
+
