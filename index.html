@@ -82,7 +82,8 @@
         <p>Ingresa el nombre que deseas y confirma para descargar el archivo, que contendrá todas las transcripciones acumuladas hasta el momento.</p>
 
         <h4> Versión: </h4>
-        <p> 15/11/2024 15:39</p>
+        <p> 15/11/2024 15:51</p>
+        
     </div>
 
     <script>
@@ -125,10 +126,24 @@
             alert("Lo siento, tu navegador no es compatible con el reconocimiento de voz.");
         }
 
+        // Función para obtener la fecha y hora en el formato deseado
+        function formatDate() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'p.m.' : 'a.m.';
+            const formattedDate = `${day}/${month}/${year}, ${hours % 12 || 12}:${minutes}:${seconds} ${ampm}`;
+            return formattedDate;
+        }
+
         startButton.onclick = function() {
             if (realTimeText.textContent) {
                 // Si ya hay texto acumulado, agregar la fecha y hora y luego el nuevo texto.
-                accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n" + realTimeText.textContent;
+                accumulated += `\n------------------------------------  Fecha y hora: ${formatDate()} ------------------------------------\n` + realTimeText.textContent;
             }
             realTimeText.textContent = '';  // Limpiar el texto en tiempo real
             recognition.start();
@@ -137,7 +152,7 @@
         stopButton.onclick = function() {
             recognition.stop();
             // Al detenerse, agregar el último texto reconocido
-            accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n" + realTimeText.textContent;
+            accumulated += `\n------------------------------------  Fecha y hora: ${formatDate()} ------------------------------------\n` + realTimeText.textContent;
             accumulatedText.textContent = accumulated;  // Mostrar el texto acumulado
         };
 
