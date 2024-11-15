@@ -144,6 +144,14 @@
             link.download = 'transcripción.txt';
             link.click();
         };
+
+        // Agregar lógica para que al hacer clic nuevamente en "Iniciar", se continúe acumulando texto
+        startButton.addEventListener('click', function() {
+            // Si la transcripción ha terminado, volver a habilitar el botón para iniciar
+            if (stopButton.disabled) {
+                startButton.disabled = false;
+            }
+        });
     </script>
 
 </body>
