@@ -82,7 +82,7 @@
         <p>Ingresa el nombre que deseas y confirma para descargar el archivo, que contendrá todas las transcripciones acumuladas hasta el momento.</p>
 
         <h4> Versión: </h4>
-        <p> 15/11/2024 15:51</p>
+        <p> 15/11/2024 16:00</p>
         
     </div>
 
@@ -143,8 +143,9 @@
         startButton.onclick = function() {
             if (realTimeText.textContent) {
                 // Si ya hay texto acumulado, agregar la fecha y hora y luego el nuevo texto.
-                accumulated += `\n------------------------------------  Fecha y hora: ${formatDate()} ------------------------------------\n` + realTimeText.textContent;
-            }
+                accumulated += "\n\n------------------------------------  Fecha y hora: ${formatDate()} ------------------------------------\n" + realTimeText.textContent;
+            } 
+
             realTimeText.textContent = '';  // Limpiar el texto en tiempo real
             recognition.start();
         };
@@ -152,7 +153,7 @@
         stopButton.onclick = function() {
             recognition.stop();
             // Al detenerse, agregar el último texto reconocido
-            accumulated += `\n------------------------------------  Fecha y hora: ${formatDate()} ------------------------------------\n` + realTimeText.textContent;
+            accumulated += "\n\n------------------------------------  Fecha y hora: ${formatDate()} ------------------------------------\n" + realTimeText.textContent;
             accumulatedText.textContent = accumulated;  // Mostrar el texto acumulado
         };
 
