@@ -70,72 +70,78 @@
         <p>Ingresa el nombre que deseas y confirma para descargar el archivo, que contendrá todas las transcripciones acumuladas hasta el momento.</p>
 
         <h4> Versión: </h4>
-        <p> 15/11/2024 16:25</p>
+        <p> 15/11/2024 16:36</p>
 
 
     </div>
-    <script>
-        const startButton = document.getElementById('startButton');
-        const stopButton = document.getElementById('stopButton');
-        const downloadButton = document.getElementById('downloadButton');
-        const realTimeText = document.getElementById('realTimeText');
-        const accumulatedText = document.getElementById('accumulatedText');
+   <script>
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const downloadButton = document.getElementById('downloadButton');
+    const realTimeText = document.getElementById('realTimeText');
+    const accumulatedText = document.getElementById('accumulatedText');
 
-        let recognition;
-        let accumulated = ""; // Variable para acumular el texto final
+    let recognition;
+    let accumulated = ""; // Variable para acumular el texto final
 
-        if ('webkitSpeechRecognition' in window) {
-            recognition = new webkitSpeechRecognition();
-            recognition.lang = 'es-AR'; // Español de Argentina
-            recognition.continuous = true;
-            recognition.interimResults = true;
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.lang = 'es-AR'; // Español de Argentina
+        recognition.continuous = true;
+        recognition.interimResults = true;
 
-            recognition.onstart = function() {
-                startButton.disabled = true;
-                stopButton.disabled = false;
-                downloadButton.disabled = true;
-                realTimeText.textContent = ''; // Limpiar texto temporal
-            };
+        recognition.onstart = function() {
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            downloadButton.disabled = true;
+            realTimeText.textContent = ''; // Limpiar texto temporal
+        };
 
-            recognition.onresult = function(event) {
-                let currentText = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    currentText += event.results[i][0].transcript;
-                }
-                realTimeText.textContent = currentText; // Mostrar texto temporal
-            };
+        recognition.onresult = function(event) {
+            let currentText = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                currentText += event.results[i][0].transcript;
+            }
+            realTimeText.textContent = currentText; // Mostrar texto temporal
+        };
 
-            recognition.onend = function() {
-                startButton.disabled = false;
-                stopButton.disabled = true;
-                downloadButton.disabled = false;
-            };
-        } else {
-            alert("Lo siento, tu navegador no es compatible con el reconocimiento de voz.");
+        recognition.onend = function() {
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            downloadButton.disabled = false;
+        };
+    } else {
+        alert("Lo siento, tu navegador no es compatible con el reconocimiento de voz.");
+    }
+
+    startButton.onclick = function() {
+        recognition.start();
+    };
+
+    stopButton.onclick = function() {
+        recognition.stop();
+
+        // Verificar si hay texto reconocido para acumular
+        if (realTimeText.textContent.trim()) {
+            // Agregar texto con fecha y hora
+            accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n------------------------------------\n" + realTimeText.textContent.trim();
+            accumulatedText.textContent = accumulated; // Actualizar texto acumulado inmediatamente
         }
 
-        startButton.onclick = function() {
-            recognition.start();
-        };
+        // Limpiar texto en tiempo real después de acumularlo
+        realTimeText.textContent = '';
+    };
 
-        stopButton.onclick = function() {
-            recognition.stop();
-            if (realTimeText.textContent.trim()) {
-                // Agregar texto al acumulado con fecha y hora
-                accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n------------------------------------\n" + realTimeText.textContent.trim();
-                accumulatedText.textContent = accumulated; // Mostrar texto acumulado
-                realTimeText.textContent = ''; // Limpiar texto en tiempo real
-            }
-        };
+    downloadButton.onclick = function() {
+        const blob = new Blob([accumulatedText.textContent], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'transcripción.txt';
+        link.click();
+    };
+</script>
 
-        downloadButton.onclick = function() {
-            const blob = new Blob([accumulatedText.textContent], { type: 'text/plain' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'transcripción.txt';
-            link.click();
-        };
-    </script>
+
 
 </body>
 </html>
