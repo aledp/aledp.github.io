@@ -17,9 +17,8 @@
             margin: 10px;
         }
 
-        #realTimeText {
+        #realTimeText, #accumulatedText {
             width: 100%;
-            height: 100px;
             margin-top: 10px;
             padding: 10px;
             border: 1px solid #ccc;
@@ -27,14 +26,12 @@
             line-height: 1.5;
         }
 
+        #realTimeText {
+            height: 100px;
+        }
+
         #accumulatedText {
-            width: 100%;
             height: 200px;
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-            line-height: 1.5;
             overflow-y: auto;
         }
 
@@ -44,7 +41,6 @@
             padding: 10px;
             border: 1px solid #ccc;
             background-color: #f9f9f9;
-            line-height: 1.5;
         }
     </style>
 </head>
@@ -57,10 +53,10 @@
     <button id="downloadButton" disabled>Descargar</button>
 
     <h2>Texto Reconocido en Tiempo Real:</h2>
-    <div id="realTimeText" contenteditable="true" readonly></div>
+    <div id="realTimeText" readonly></div>
 
     <h2>Texto Acumulado:</h2>
-    <div id="accumulatedText" contenteditable="true" readonly></div>
+    <div id="accumulatedText" readonly></div>
 
     <div id="instructions">
         <h3>Instructivo de Uso: Aplicación de Reconocimiento de Voz y Acumulación de Texto</h3>
@@ -82,8 +78,7 @@
         <p>Ingresa el nombre que deseas y confirma para descargar el archivo, que contendrá todas las transcripciones acumuladas hasta el momento.</p>
 
         <h4> Versión: </h4>
-        <p> 15/11/2024 16:09</p>
-        
+        <p> 15/11/2024 16:15</p>
     </div>
 
     <script>
@@ -95,6 +90,7 @@
 
         let recognition;
         let accumulated = "";  // Variable para acumular el texto final
+        let isRecording = false;
 
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
@@ -106,7 +102,8 @@
                 startButton.disabled = true;
                 stopButton.disabled = false;
                 downloadButton.disabled = true;
-                realTimeText.textContent = '';  // Clear real-time text at the start
+                isRecording = true;
+                realTimeText.textContent = '';  // Limpiar texto temporal
             };
 
             recognition.onresult = function(event) {
@@ -114,48 +111,36 @@
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     currentText += event.results[i][0].transcript;
                 }
-                realTimeText.textContent = currentText; // Display current real-time text
+                realTimeText.textContent = currentText; // Mostrar texto temporal
             };
 
             recognition.onend = function() {
                 stopButton.disabled = true;
                 downloadButton.disabled = false;
-                startButton.disabled = false;  // Enable "Iniciar" again to continue accumulating text
+                isRecording = false;
             };
         } else {
             alert("Lo siento, tu navegador no es compatible con el reconocimiento de voz.");
         }
 
-        // Función para obtener la fecha y hora en el formato deseado
-        function formatDate() {
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const ampm = hours >= 12 ? 'p.m.' : 'a.m.';
-            const formattedDate = `${day}/${month}/${year}, ${hours % 12 || 12}:${minutes}:${seconds} ${ampm}`;
-            return formattedDate;
-        }
-
         startButton.onclick = function() {
-            if (realTimeText.textContent) {
-                // Si ya hay texto acumulado, agregar la fecha y hora y luego el nuevo texto.
-                accumulated += "\n------------------------------------  Fecha y hora: ${formatDate()} ------------------------------------\n' + realTimeText.textContent;
-            } 
+            // Acumular texto actual (si lo hay) antes de reiniciar
+            if (realTimeText.textContent.trim() && !isRecording) {
+                accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n------------------------------------\n" + realTimeText.textContent;
+                accumulatedText.textContent = accumulated;
+                realTimeText.textContent = ''; // Limpiar texto en tiempo real
+            }
 
-            realTimeText.textContent = '';  // Limpiar el texto en tiempo real
             recognition.start();
         };
 
         stopButton.onclick = function() {
             recognition.stop();
-            // Al detenerse, agregar el último texto reconocido
-            accumulated += '\n------------------------------------  Fecha y hora: ${formatDate()} ------------------------------------\n' + realTimeText.textContent;
-            accumulatedText.textContent = accumulated;  // Mostrar el texto acumulado
-            accumulatedText.textContent = '\n' ;  //################
+            if (realTimeText.textContent.trim()) {
+                accumulated += "\n------------------------------------\nFecha y hora: " + new Date().toLocaleString() + "\n------------------------------------\n" + realTimeText.textContent;
+                accumulatedText.textContent = accumulated; // Mostrar texto acumulado
+                realTimeText.textContent = ''; // Limpiar texto temporal
+            }
         };
 
         downloadButton.onclick = function() {
